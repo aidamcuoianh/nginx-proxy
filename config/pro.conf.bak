@@ -1,0 +1,382 @@
+proxy_cache_path /var/cache/nginx/minio levels=1:2 keys_zone=minio_s3:10m max_size=10g inactive=60m use_temp_path=off;
+limit_req_zone $binary_remote_addr zone=l1_index:10m rate=3r/s; # khai báo zone cho page index
+limit_req_zone $binary_remote_addr zone=l1_catchall:10m rate=5r/s; # khai báo zone choh catch all location
+limit_req_zone $binary_remote_addr zone=l2_index:10m rate=3r/s;
+limit_req_zone $binary_remote_addr zone=l2_catchall:10m rate=5r/s;
+limit_req_zone $binary_remote_addr zone=l3_index:10m rate=3r/s;
+limit_req_zone $binary_remote_addr zone=l3_catchall:10m rate=5r/s;
+limit_req_zone $binary_remote_addr zone=l4_index:10m rate=3r/s;
+limit_req_zone $binary_remote_addr zone=l4_catchall:10m rate=5r/s;
+limit_req_zone $binary_remote_addr zone=l5_index:10m rate=3r/s;
+limit_req_zone $binary_remote_addr zone=l5_catchall:10m rate=5r/s;
+
+upstream backend {
+   server 89.58.7.79;
+}
+
+server {
+        listen 80;
+        listen [::]:80;
+
+        server_name *.suachuadogoduykhanh.com suachuadogoduykhanh.com;
+
+        access_log /var/log/nginx/suachuadogoduykhanh.com.log;
+
+        location / {
+            #proxy_pass http://202.61.239.16/;
+            proxy_pass http://89.58.7.79/;
+            proxy_http_version 1.1;
+            proxy_buffering off;
+            proxy_read_timeout    120;
+            proxy_connect_timeout 120;
+            proxy_redirect        off;
+            proxy_set_header Host $host;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Proxy "";
+
+            proxy_redirect      http://89.58.7.79 https://suachuadogoduykhanh.com;
+        }
+}
+
+server {
+        listen 80;
+        listen [::]:80;
+
+        server_name *.gogoanimetv.uk gogoanimetv.uk;
+
+        access_log /var/log/nginx/gogoanimetv.uk.log;
+
+
+	location ~* \.(swf|ogg|ogv|svg|svgz|eot|otf|woff|mp4|ttf|css|rss|atom|js|jpg|jpeg|gif|png|ico|tgz|gz|rar|bz2|tar|mid|midi|wav|bmp|rtf|woff|woff2|mo|zip|txt)$ {
+            try_files $uri @proxy;
+        }
+
+
+        location = / {
+            limit_req zone=l1_index burst=3 nodelay;
+            try_files $uri @proxy;
+        }
+
+        location / {
+            limit_req zone=l1_catchall burst=10 delay=7;
+            try_files $uri @proxy;
+        }
+
+        location @proxy {
+            proxy_pass http://backend$uri;
+            proxy_http_version 1.1;
+            proxy_buffering off;
+            proxy_read_timeout    120;
+            proxy_connect_timeout 120;
+            proxy_redirect        off;
+            proxy_set_header Host $host;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Proxy "";
+        }
+
+}
+
+server {
+        listen 80;
+        listen [::]:80;
+
+        server_name *.kiss-anime.uk kiss-anime.uk *.123myanimelist.net 123myanimelist.net;
+
+        access_log /var/log/nginx/kiss-anime.uk.log;
+
+        location / {
+            #proxy_pass http://202.61.239.16/;
+            proxy_pass http://89.58.7.79/;
+            proxy_http_version 1.1;
+            proxy_buffering off;
+            proxy_read_timeout    120;
+            proxy_connect_timeout 120;
+            proxy_redirect        off;
+            proxy_set_header Host $host;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Proxy "";
+        }
+        if ($http_user_agent ~* (duckduckbot) ) {
+             return 403;
+        }
+}
+
+server {
+        listen 80;
+        listen [::]:80;
+
+        server_name *.kissanime-ru.ws kissanime-ru.ws;
+
+        access_log /var/log/nginx/kissanime-ru.ws.log;
+
+        location / {
+            #proxy_pass http://202.61.239.16/;
+            proxy_pass http://89.58.7.79/;
+            proxy_http_version 1.1;
+            proxy_buffering off;
+            proxy_read_timeout    120;
+            proxy_connect_timeout 120;
+            proxy_redirect        off;
+            proxy_set_header Host $host;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Proxy "";
+        }
+        if ($http_user_agent ~* (duckduckbot) ) {
+             return 403;
+        }
+}
+
+#server {
+#        listen 80;
+#        listen [::]:80;
+#
+#        server_name *.123myanimelist.net 123myanimelist.net;
+#
+#        access_log /var/log/nginx/123myanimelist.net.log;
+#
+#        location / {			
+#	        proxy_set_header Host $host;
+#	        proxy_set_header X-Real-IP $remote_addr;
+#	        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#	        proxy_set_header X-Forwarded-Proto https;
+#			
+#	        #proxy_pass          http://202.61.239.16;
+#                proxy_pass http://89.58.7.79/;
+#	        proxy_read_timeout  90;
+#
+#	        proxy_redirect      http://89.58.7.79 https://123myanimelist.net;
+#        }
+#}
+
+server {
+        listen 80;
+        listen [::]:80;
+
+        server_name cdn.comic-top.com;
+
+        access_log /var/log/nginx/cdn.comic-top.com.log;
+
+        location / {
+            # Configure out caches
+            proxy_cache minio_s3;
+            proxy_buffering on ;
+            proxy_buffers 8 16k;
+            proxy_buffer_size 16k;
+            proxy_busy_buffers_size 32k;
+            
+            # Do not convert HEAD into GET
+            proxy_cache_convert_head off;
+            
+            # Pass along Authorization credentials to upstream S3
+            #proxy_set_header Authorization $http_authorization;
+            
+            # proxy_cache_purge $purge_method;
+            #proxy_cache_bypass $http_cachepurge;
+            
+            # Since head conversion is disabled, the request_method is included in the proxy_cache_key
+            #proxy_cache_key  "$scheme$proxy_host$request_method$request_uri$is_args$args";
+            
+            # GET and HEAD are cached by default
+            # proxy_cache_methods GET HEAD;
+            
+            # Cache all 200 OK's for 24 hours
+            proxy_cache_valid  200 24h;
+            
+            # Use stale cache file in all errors from upstream if we can
+            #proxy_cache_use_stale  error timeout updating http_500 http_502 http_503 http_504;
+            
+            # Lock the cache so that only one request can populate it at a time
+            proxy_cache_background_update on;
+            proxy_cache_lock    on;
+            proxy_cache_revalidate on;
+            #proxy_cache_min_uses 3;
+            
+            
+            add_header  Cache-Control max-age=31536000;
+            add_header  X-Cache-Status $upstream_cache_status;
+
+            proxy_pass http://89.58.7.79/;
+            proxy_http_version 1.1;
+            #proxy_buffering off;
+            proxy_read_timeout    120;
+            proxy_connect_timeout 120;
+            proxy_redirect        off;
+            proxy_set_header Host $host;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Proxy "";
+
+        }
+}
+
+server {
+        listen 80;
+        listen [::]:80;
+
+        server_name *.comic-top.com comic-top.com;
+
+        access_log /var/log/nginx/comic-top.com.log;
+	rewrite ^/blog/%E8%AA%AD%E3%82%80%E3%81%AE%E3%81%8B%E3%81%84%EF%BC%9F-%E8%AA%AD%E3%81%BE%E3%81%AA%E3%81%84%E3%81%AE%E3%81%8B%E3%81%84%EF%BC%9F-%E3%81%A9%E3%81%A3%E3%81%A1%E3%81%AA%E3%82%93%E3%81%A0%E3%81%84%EF%BC%81/$ http://comic-top.com/yomu-no-kai-yomanai-no-kai-dotchi-nan-dai-shirufu-dai-zoryo-fyea-kaisai/ permanent;
+        rewrite ^/blog/読むのかい？-読まないのかい？-どっちなんだい！/ http://comic-top.com/yomu-no-kai-yomanai-no-kai-dotchi-nan-dai-shirufu-dai-zoryo-fyea-kaisai/ permanent;
+        rewrite ^/blog/2022%E5%B9%B48%E6%9C%88%E3%81%AEkadokawa%E3%82%B3%E3%83%9F%E3%83%83%E3%82%AF%E5%BF%9C%E6%8F%B4%E5%BA%97%E9%99%90%E5%AE%9A%E3%82%A4%E3%83%A9%E3%82%B9%E3%83%88%E3%82%AB%E3%83%BC%E3%83%89/ http://comic-top.com/blog/2022-nen-8-tsuki-no-kadokawa-komikku-oenten-gentei-irasuto-ka-do/ permanent;
+        rewrite ^/blog/2022年8月のkadokawaコミック応援店限定イラストカード/ http://comic-top.com/blog/2022-nen-8-tsuki-no-kadokawa-komikku-oenten-gentei-irasuto-ka-do/ permanent;
+        rewrite ^/a-z/ http://comic-top.com/az-lists/ permanent;
+        rewrite ^/member/forgot_password http://comic-top.com/account/?action=lostpassword permanent;
+	rewrite ^/login http://comic-top.com/account/ permanent;
+
+        location / {
+	            # Configure out caches
+        #proxy_cache minio_s3;
+        proxy_buffering on ;
+        proxy_buffers 8 16k;
+        proxy_buffer_size 16k;
+        proxy_busy_buffers_size 32k;
+
+        # Do not convert HEAD into GET
+        proxy_cache_convert_head off;
+
+        # Pass along Authorization credentials to upstream S3
+        #proxy_set_header Authorization $http_authorization;
+
+        # proxy_cache_purge $purge_method;
+        #proxy_cache_bypass $http_cachepurge;
+
+        # Since head conversion is disabled, the request_method is included in the proxy_cache_key
+        #proxy_cache_key  "$scheme$proxy_host$request_method$request_uri$is_args$args";
+
+        # GET and HEAD are cached by default
+        # proxy_cache_methods GET HEAD;
+
+        # Cache all 200 OK's for 24 hours
+        proxy_cache_valid  200 24h;
+
+        # Use stale cache file in all errors from upstream if we can
+        #proxy_cache_use_stale  error timeout updating http_500 http_502 http_503 http_504;
+
+        # Lock the cache so that only one request can populate it at a time
+        proxy_cache_background_update on;
+        proxy_cache_lock    on;
+        proxy_cache_revalidate on;
+        #proxy_cache_min_uses 3;
+
+
+        add_header             Cache-Control max-age=31536000;
+        add_header             X-Cache-Status $upstream_cache_status;
+
+            proxy_pass http://89.58.7.79/;
+            proxy_http_version 1.1;
+            #proxy_buffering off;
+            proxy_read_timeout    120;
+            proxy_connect_timeout 120;
+            proxy_redirect        off;
+            proxy_set_header Host $host;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Proxy "";
+	    
+        }
+}
+
+server {
+        listen 80;
+        listen [::]:80;
+
+        server_name cdn.comicjpa.com;
+
+        access_log /var/log/nginx/cdn.comicjpa.com.log;
+
+        location / {
+            # Configure out caches
+            proxy_cache minio_s3;
+            proxy_buffering on ;
+            proxy_buffers 8 16k;
+            proxy_buffer_size 16k;
+            proxy_busy_buffers_size 32k;
+            
+            # Do not convert HEAD into GET
+            proxy_cache_convert_head off;
+            
+            # Pass along Authorization credentials to upstream S3
+            #proxy_set_header Authorization $http_authorization;
+            
+            # proxy_cache_purge $purge_method;
+            #proxy_cache_bypass $http_cachepurge;
+            
+            # Since head conversion is disabled, the request_method is included in the proxy_cache_key
+            #proxy_cache_key  "$scheme$proxy_host$request_method$request_uri$is_args$args";
+            
+            # GET and HEAD are cached by default
+            # proxy_cache_methods GET HEAD;
+            
+            # Cache all 200 OK's for 24 hours
+            proxy_cache_valid  200 24h;
+            
+            # Use stale cache file in all errors from upstream if we can
+            #proxy_cache_use_stale  error timeout updating http_500 http_502 http_503 http_504;
+            
+            # Lock the cache so that only one request can populate it at a time
+            proxy_cache_background_update on;
+            proxy_cache_lock    on;
+            proxy_cache_revalidate on;
+            #proxy_cache_min_uses 3;
+            
+            
+            add_header  Cache-Control max-age=31536000;
+            add_header  X-Cache-Status $upstream_cache_status;
+
+            proxy_pass http://89.58.7.79/;
+            proxy_http_version 1.1;
+            #proxy_buffering off;
+            proxy_read_timeout    120;
+            proxy_connect_timeout 120;
+            proxy_redirect        off;
+            proxy_set_header Host $host;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Proxy "";
+
+        }
+}
+
+server {
+        listen 80;
+        listen [::]:80;
+
+        server_name *.comicjpa.com comicjpa.com;
+
+        access_log /var/log/nginx/comicjpa.com.log;
+
+        location / {
+            proxy_pass http://89.58.7.79/;
+            proxy_http_version 1.1;
+            #proxy_buffering off;
+            proxy_read_timeout    120;
+            proxy_connect_timeout 120;
+            proxy_redirect        off;
+            proxy_set_header Host $host;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Proxy "";
+	    
+        }
+}
