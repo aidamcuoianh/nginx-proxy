@@ -33,7 +33,7 @@ RUN mkdir -p /etc/nginx/modules-enabled && \
     echo "load_module modules/ngx_http_brotli_static_module.so;" >> /etc/nginx/modules-enabled/50-mod-http-brotli.conf
 
 # Install logrotate
-RUN apt-get -y install logrotate
+RUN apt-get update && apt-get -y install logrotate
 
 COPY ./config/nginx.conf /etc/nginx/nginx.conf
 
